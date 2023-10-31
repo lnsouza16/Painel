@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e6f7ff;
+    padding: 20px;
+}
+
+h2 {
+    color: #005b96;
+}
+
+button {
+    background-color: #0080ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0059b3;
+}
+
+#fila {
+    margin-top: 20px;
+    border: 1px solid #005b96;
+    padding: 10px;
+}
+
+#fila li {
+    background-color: #b3d1ff;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+
+</style>
+    <title>Gerar Senha</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+    $('#gerar').click(function(){
+        $.get('/gerar_senha', function(data){
+            var senha = data.senha;
+            var horario = data.horario;
+            $('#fila').append('<li class="senha">Senha: ' + senha + ' Horário: ' + horario + '</li>');
+        });
+    });
+
+    setInterval(function() {
+        $('#fila').load('/fila_senhas');
+    }, 1000);
+});
+    </script>
+</head>
+<body>
+
+<h2>Gerar Senha</h2>
+
+<button id="gerar">Gerar Senha</button>
+
+<h2>Fila de Senhas:</h2>
+<div id="fila"></div>
+
+</body>
+</html>

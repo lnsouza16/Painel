@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Status das Mesas</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            setInterval(function() {
+                $.get('/status_mesas', function(data){
+                    $('#status').html(data);
+                });
+                $('#fila').load('/fila_senhas');
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+
+<h2>Status das Mesas</h2>
+
+<div id="status"></div>
+
+<h2>Fila de Senhas:</h2>
+<div id="fila"></div>
+
+</body>
+</html>
