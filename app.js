@@ -3,6 +3,8 @@ const app = express();
 app.use(express.static('public'));
 let senha = 0;
 let fila = [];
+let filaPreferencial = [];
+let filaNormal = [];
 let chamadas = [];
 let mesasComSenhasChamadas = {};
 let mesasEmAtendimento = {};
@@ -12,24 +14,39 @@ let todasAsMesas = {1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: tru
 app.use(express.static('public'));
 
 app.get('/gerar_senha', (req, res) => {
-    senha++;
+    let senhaEspecifica = req.query.senha;
+    let tipo = req.query.tipo;
+    if (senhaEspecifica) {
+        senha = senhaEspecifica;
+    } else {
+        senha++;
+    }
     let horario = new Date();
     let horas = horario.getHours();
     let minutos = horario.getMinutes();
     let segundos = horario.getSeconds();
     let horarioFormatado = `${horas}:${minutos}:${segundos}`;
-    fila.push({senha: senha, horario: horarioFormatado});
-    res.send(`Senha gerada: ${senha} às ${horarioFormatado}`);
+    if (tipo === 'preferencial') {
+        filaPreferencial.push({senha: senha, horario: horarioFormatado});
+    } else {
+        filaNormal.push({senha: senha, horario: horarioFormatado});
+    }
+    res.send(`Senha ${tipo} gerada: ${senha} às ${horarioFormatado}`);
 });
 
 app.get('/chamar_senha', (req, res) => {
     let mesa = req.query.mesa;
     if (mesasComSenhasChamadas[mesa]) {
         res.send('Erro: Mesa já tem uma senha chamada');
-    } else if (fila.length === 0) {
+    } else if (filaPreferencial.length === 0 && filaNormal.length === 0) {
         res.send('Nenhuma senha na fila');
     } else {
-        let senhaChamada = fila.shift();
+        let senhaChamada;
+        if (filaPreferencial.length > 0) {
+            senhaChamada = filaPreferencial.shift();
+        } else {
+            senhaChamada = filaNormal.shift();
+        }
         mesasComSenhasChamadas[mesa] = senhaChamada.senha;
         todasAsMesas[mesa] = false;
         chamadas.push(`Senha ${senhaChamada.senha} / Mesa ${mesa}`);
@@ -85,8 +102,9 @@ app.get('/status_mesas', (req, res) => {
 
 
 app.get('/fila_senhas', (req, res) => {
-    let senhas = fila.map(item => `Senha ${item.senha} gerada às ${item.horario}`).join('<br>');
-    res.send(senhas);
+    let senhasPreferenciais = filaPreferencial.map(item => `Senha preferencial ${item.senha} gerada às ${item.horario}`).join('<br>');
+    let senhasNormais = filaNormal.map(item => `Senha normal ${item.senha} gerada às ${item.horario}`).join('<br>');
+    res.send(`${senhasPreferenciais}<br>${senhasNormais}`);
 });
 
 
